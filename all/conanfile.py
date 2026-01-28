@@ -203,65 +203,25 @@ class MultiarchGNUToolchainPackage(ConanFile):
         VARIANT = self._determine_gcc_variant()
         BUILD_OS = str(self._settings_build.os)
         BUILD_ARCH = str(self._settings_build.arch)
+        VERSION = self.version
+        ARCH = str(self._settings_build.arch)
 
         self.output.info(f'VARIANT: {VARIANT}')
         self.output.info(f'BUILD_OS: {BUILD_OS}, BUILD_ARCH: {BUILD_ARCH}')
 
-        URL = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
-        SHA256 = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["sha256"]
+        URL = self.conan_data["sources"][VERSION][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
+        SHA256 = self.conan_data["sources"][VERSION][VARIANT][BUILD_OS][BUILD_ARCH]["sha256"]
 
-        get(self, URL, sha256=SHA256, strip_root=True,
-            destination=self.package_folder)
+        # For some reason ARM decided to make this version have a different
+        # folder layout compared to others so we need a special case for this.
+        should_strip_root = not (
+            (VERSION == "14.2" or VERSION == "14.3" or VERSION == "14") and
+            (BUILD_OS == "Windows" and BUILD_ARCH == "x86_64") and
+            VARIANT == "arm-none-eabi"
+        )
 
-        if (not (Path(self.package_folder) / "bin").exists() and
-                BUILD_OS == "Macos"):
-            # Handle Macos case: move contents of versioned folder (e.g., 14.3.0) to root
-            package_folder = Path(self.package_folder)
-
-            # Find any folder that starts with "14"
-            versioned_folders = [
-                f for f in package_folder.iterdir()
-                if f.is_dir() and f.name.startswith(self.version)]
-
-            if versioned_folders:
-                # Move contents of the first matching folder to root
-                versioned_folder = versioned_folders[0]
-                self.output.info(
-                    f"Moving contents from {versioned_folder} to root")
-
-                for item in versioned_folder.iterdir():
-                    if item.is_dir():
-                        shutil.move(str(item), str(package_folder / item.name))
-                    else:
-                        shutil.move(str(item), str(package_folder / item.name))
-
-                # Remove the now-empty versioned folder
-                shutil.rmtree(versioned_folder)
-
-            # Create symlinks in bin directory for files ending with version
-            # suffix
-            bin_folder = package_folder / "bin"
-            if bin_folder.exists():
-                # Get the major version (e.g., "14" from "14.3.0")
-                major_version = self.version.split(
-                    '.')[0] if '.' in self.version else self.version
-
-                # Create symlinks for files ending with the major version
-                for item in bin_folder.iterdir():
-                    if item.is_file() and item.name.endswith(f"-{major_version}"):
-                        # Remove the version suffix from the filename (e.g., "gcc-14" -> "gcc")
-                        symlink_name = item.name[:-len(f"-{major_version}")]
-
-                        # Create symlink
-                        symlink_path = bin_folder / symlink_name
-                        if not symlink_path.exists():
-                            try:
-                                symlink_path.symlink_to(item.name)
-                                self.output.info(
-                                    f"Created symlink: {symlink_name} -> {item.name}")
-                            except OSError as e:
-                                self.output.warn(
-                                    f"Failed to create symlink {symlink_name}: {e}")
+        get(self, URL, sha256=SHA256,
+            destination=self.package_folder, strip_root=should_strip_root)
 
     def _package_local_path(self):
         """Package using a local toolchain installation"""
