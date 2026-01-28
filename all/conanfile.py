@@ -88,7 +88,8 @@ class MultiarchGNUToolchainPackage(ConanFile):
             COMPILER_VERSION = str(
                 self.settings_target.get_safe("compiler.version", ""))
             if COMPILER_VERSION.startswith("14"):
-                self.output.debug("Disabling LTO for GCC 14 (ZSTD incompatibility)")
+                self.output.debug(
+                    "Disabling LTO for GCC 14 (ZSTD incompatibility)")
                 self.options.lto = False
             else:
                 self.output.debug("Enabling LTO for GCC")
@@ -169,7 +170,8 @@ class MultiarchGNUToolchainPackage(ConanFile):
         TARGET_OS = self.settings_target.get_safe("os")
         TARGET_ARCH = self.settings_target.get_safe("arch")
 
-        self.output.debug(f"target: os: '{TARGET_OS}', architecture: '{TARGET_ARCH}'")
+        self.output.debug(
+            f"target: os: '{TARGET_OS}', architecture: '{TARGET_ARCH}'")
 
         # ARM Cortex-M baremetal targets use ARM cross-compiler
         if TARGET_OS == "baremetal" and TARGET_ARCH in [
@@ -194,28 +196,23 @@ class MultiarchGNUToolchainPackage(ConanFile):
 
     def _extract_macos_pkg(self, url: str, sha256: str):
         """Extract macOS .pkg installer (simonjwright GCC)"""
-        LOCAL_PKG = Path(self.source_folder) / "gcc.pkg"
+        LOCAL_PKG = Path(self.build_folder) / "gcc.pkg"
         download(self, url, LOCAL_PKG, sha256=sha256)
 
-        # Expand pkg to temp directory
+        # Expand pkg to nested directory
+        EXTRACT_DIR = Path(self.build_folder) / "local_gcc"
         subprocess.run(
-            ["pkgutil", "--expand-full", str(LOCAL_PKG), self.build_folder],
+            ["pkgutil", "--expand-full", str(LOCAL_PKG), str(EXTRACT_DIR)],
             check=True)
 
-        # Copy from extracted payload to package folder
-        # simonjwright pkgs install to /opt/gcc-<version>
-        # Structure inside pkg: gcc.pkg/Payload/opt/gcc-<version>/...
-        PAYLOAD_DIR = Path(self.build_folder)
-        for pkg_dir in PAYLOAD_DIR.glob("*.pkg"):
+        # Find the Payload directory inside the extracted .pkg folder
+        # Structure: local_gcc/gcc-14.2.0-3-aarch64-apple-darwin23.pkg/Payload/bin
+        for pkg_dir in EXTRACT_DIR.glob("*.pkg"):
             payload_path = pkg_dir / "Payload"
             if payload_path.exists():
-                # Find the gcc directory inside Payload/opt/
-                opt_path = payload_path / "opt"
-                if opt_path.exists():
-                    for gcc_dir in opt_path.glob("gcc-*"):
-                        self.output.info(f"Copying contents of {gcc_dir}")
-                        copy(self, "**", src=gcc_dir,
-                             dst=self.package_folder, keep_path=True)
+                self.output.info(f"Copying contents from {payload_path}")
+                copy(self, "*", src=payload_path,
+                     dst=self.package_folder, keep_path=True)
 
         LOCAL_PKG.unlink()
 
