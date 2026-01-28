@@ -67,13 +67,17 @@ jobs:
       - name: 📡 Install local toolchain profiles
         run: conan config install -tf profiles/ -sf conan/profiles/v1/ .
 
-      - name: 📦 Create GCC Toolchain Package (native build)
+      - name: 📦 Create gcc Toolchain Package (native build)
         if: ${{ inputs.host_profile == '' }}
-        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=ninja --build=missing:ninja/*
+        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=make --build=missing:make/*
 
-      - name: 📦 Create GCC Toolchain Package (cross build)
+      - name: 📦 Create gcc Toolchain Package (cross build)
         if: ${{ inputs.host_profile != '' }}
-        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* -pr:h gcc-${{ inputs.version }} $HOST_PROFILE --build=ninja --build=missing:ninja/*
+        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* -pr:h gcc-${{ inputs.version }} $HOST_PROFILE --build=make --build=missing:make/*
+
+      - name: ⚙️ Build/Install ninja from scratch using gcc for build platform
+        run: >
+          conan install --tool-requires="ninja/1.13.2" --build="ninja/*" -pr:a gcc-${{ inputs.version }} --build=cmake --build=missing:cmake/*
 
       - name: 📦 Build C++ demo using GCC toolchain
         run: conan build demos/cpp -pr:a gcc-${{ inputs.version }} $HOST_PROFILE
