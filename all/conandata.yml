@@ -26,8 +26,11 @@ sources:
           sha256: "4c3b546a98293c09b16762a8c55e040e6d0198b5ced1cc0c5c60c22758da6e88"
       "Macos":
         "armv8":
-          url: "https://github.com/simonjwright/distributing-gcc/releases/download/gcc-14.2.0-3-aarch64/gcc-14.2.0-3-aarch64-apple-darwin23.pkg"
-          sha256: "ef35993b047e86631412446c7cd2921d157f83facb2173579e922962c968f95a"
+          url: "https://github.com/libhal/multiarch-gnu-toolchain/releases/download/prebuilt-14/gcc14.3.0.arm64_sonoma.bottle.2.tar.gz"
+          sha256: "36963df72a5f78d963aa6e2704d0d676880fbdade137f6b8887bbb7a9e6cac42"
+        "x86_64":
+          url: "https://github.com/libhal/multiarch-gnu-toolchain/releases/download/prebuilt-14/gcc14.3.0.x86_64_sonoma.bottle.2.tar.gz"
+          sha256: "07fbaa38d4dc9f30456e6c09a2fdedd590dcf5829b1849a5b2c57fb13e0d65c1"
       "Windows":
         "x86_64":
           url: "https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v14.2.0-1/xpack-gcc-14.2.0-1-win32-x64.zip"

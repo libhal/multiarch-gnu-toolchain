@@ -194,37 +194,14 @@ class MultiarchGNUToolchainPackage(ConanFile):
         self.output.debug("Defaulting to native GCC binary")
         return "native"
 
-    def _extract_macos_pkg(self, url: str, sha256: str):
-        """Extract macOS .pkg installer (simonjwright GCC)"""
-        LOCAL_PKG = Path(self.build_folder) / "gcc.pkg"
-        download(self, url, LOCAL_PKG, sha256=sha256)
-
-        # Expand pkg to nested directory
-        EXTRACT_DIR = Path(self.build_folder) / "local_gcc"
-        subprocess.run(
-            ["pkgutil", "--expand-full", str(LOCAL_PKG), str(EXTRACT_DIR)],
-            check=True)
-
-        # Find the Payload directory inside the extracted .pkg folder
-        # Structure: local_gcc/gcc-14.2.0-3-aarch64-apple-darwin23.pkg/Payload/bin
-        for pkg_dir in EXTRACT_DIR.glob("*.pkg"):
-            payload_path = pkg_dir / "Payload"
-            if payload_path.exists():
-                self.output.info(f"Copying contents from {payload_path}")
-                copy(self, "*", src=payload_path,
-                     dst=self.package_folder, keep_path=True)
-
-        LOCAL_PKG.unlink()
-
-    def _extract(self, url: str, sha256: str):
-        """Extract toolchain archive based on file type"""
-        if url.endswith(".pkg"):
-            self._extract_macos_pkg(url=url, sha256=sha256)
-            return
-
+    def _extract(self, url: str, sha256: str, os: str):
         # Standard extraction for tar.gz, tar.xz, zip
         get(self, url, sha256=sha256, strip_root=True,
             destination=self.package_folder)
+
+        # if os == "Macos":
+        #     # Add sym links to everything with the extension -14
+        #     pass
 
     def package(self):
         # Use local path if specified
@@ -242,7 +219,7 @@ class MultiarchGNUToolchainPackage(ConanFile):
         URL = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
         SHA256 = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["sha256"]
 
-        self._extract(URL, SHA256)
+        self._extract(URL, SHA256, BUILD_OS, BUILD_ARCH)
 
     def _package_local_path(self):
         """Package using a local toolchain installation"""
