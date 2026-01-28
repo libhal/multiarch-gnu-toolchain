@@ -17,22 +17,31 @@ name: 🔍 Verify
 on:
   workflow_call:
     inputs:
+      display_name:
+        type: string
+        required: true
       version:
         type: string
         required: true
       os:
         type: string
         required: true
-      demo_profile:
+      host_profile:
         type: string
-        required: true
+        default: ""
+
+env:
+  VERBOSE: "1"
 
 jobs:
   verify:
+    name: ${{ inputs.display_name }}
     strategy:
       fail-fast: false
 
     runs-on: ${{ inputs.os }}
+    env:
+      HOST_PROFILE: ${{ inputs.host_profile && format('-pr {0}', inputs.host_profile) || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,13 +64,13 @@ jobs:
       - name: 📡 Install local toolchain profiles
         run: conan config install -tf profiles/ -sf conan/profiles/v1/ .
 
-      - name: 📦 Create Conan Package
-        run: conan create all -pr:b default -pr:h gcc-${{ inputs.version }} -pr:h ${{ inputs.demo_profile }} --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=ninja --build=missing:ninja/* -c tools.build:skip_test=True
+      - name: 📦 Create GCC Toolchain Package (native build)
+        if: ${{ inputs.host_profile == '' }}
+        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=ninja --build=missing:ninja/*
 
-      - name: 📦 Build Demos Conan Package
-        if: ${{ runner.os != 'Windows' }}
-        run: VERBOSE=1 conan build demos/cpp -pr gcc-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
+      - name: 📦 Create GCC Toolchain Package (cross build)
+        if: ${{ inputs.host_profile != '' }}
+        run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* -pr:h gcc-${{ inputs.version }} $HOST_PROFILE --build=ninja --build=missing:ninja/*
 
-      - name: 📦 Build Demos Conan Package (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        run: conan build demos/cpp -pr gcc-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
+      - name: 📦 Build C++ demo using GCC toolchain
+        run: conan build demos/cpp -pr:a gcc-${{ inputs.version }} $HOST_PROFILE
