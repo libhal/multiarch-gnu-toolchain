@@ -10,7 +10,7 @@ compiler.libcxx=libstdc++11
 compiler.version=14
 
 [tool_requires]
-multiarch-gnu-toolchain/14.2
+multiarch-gnu-toolchain/14
 
 {% elif context == "build" %}
 
@@ -24,6 +24,6 @@ compiler.libcxx=libstdc++11
 compiler.version=14
 
 [tool_requires]
-!multiarch-gnu-toolchain/*: multiarch-gnu-toolchain/14.2, cmake/[>=3.28.0 <5.0.0]
+!multiarch-gnu-toolchain/*: multiarch-gnu-toolchain/14, cmake/[>=3.28.0 <5.0.0]
 
 {% endif %}

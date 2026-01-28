@@ -61,6 +61,9 @@ jobs:
       - name: 👁️‍🗨️ Show conan profile
         run: conan profile show
 
+      - name: 📡 Install libhal conan configurations
+        run: conan config install https://github.com/libhal/conan-config2.git
+
       - name: 📡 Install local toolchain profiles
         run: conan config install -tf profiles/ -sf conan/profiles/v1/ .
 
