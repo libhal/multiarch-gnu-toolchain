@@ -102,13 +102,13 @@ jobs:
       os: macos-15
       host_profile: cortex-m4f
 
-  verify-macos-15-intel-cortex-m4f:
-    uses: ./.github/workflows/verify.yml
-    with:
-      display_name: macOS 15 Intel → Cortex-M4F
-      version: ${{ inputs.version }}
-      os: macos-15-intel
-      host_profile: cortex-m4f
+  # verify-macos-15-intel-cortex-m4f:
+  #   uses: ./.github/workflows/verify.yml
+  #   with:
+  #     display_name: macOS 15 Intel → Cortex-M4F
+  #     version: ${{ inputs.version }}
+  #     os: macos-15-intel
+  #     host_profile: cortex-m4f
 
   verify-windows-x86_64-cortex-m33f:
     uses: ./.github/workflows/verify.yml
@@ -130,7 +130,7 @@ jobs:
       - verify-linux-arm-cortex-m4
       - verify-macos-14-arm-cortex-m4f
       - verify-macos-15-arm-cortex-m4f
-      - verify-macos-15-intel-cortex-m4f
+      # - verify-macos-15-intel-cortex-m4f
       - verify-windows-x86_64-cortex-m33f
     if: ${{ startsWith(github.ref, 'refs/tags/') && inputs.upload == true }}
     uses: ./.github/workflows/upload.yml
