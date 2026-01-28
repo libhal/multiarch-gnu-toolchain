@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
+import shutil
 from pathlib import Path
 from conan import ConanFile
-from conan.tools.files import get, download, copy
+from conan.tools.files import get
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -194,15 +194,6 @@ class MultiarchGNUToolchainPackage(ConanFile):
         self.output.debug("Defaulting to native GCC binary")
         return "native"
 
-    def _extract(self, url: str, sha256: str, os: str):
-        # Standard extraction for tar.gz, tar.xz, zip
-        get(self, url, sha256=sha256, strip_root=True,
-            destination=self.package_folder)
-
-        # if os == "Macos":
-        #     # Add sym links to everything with the extension -14
-        #     pass
-
     def package(self):
         # Use local path if specified
         if self.options.local_path:
@@ -219,7 +210,58 @@ class MultiarchGNUToolchainPackage(ConanFile):
         URL = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
         SHA256 = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["sha256"]
 
-        self._extract(URL, SHA256, BUILD_OS)
+        get(self, URL, sha256=SHA256, strip_root=True,
+            destination=self.package_folder)
+
+        if (not (Path(self.package_folder) / "bin").exists() and
+                BUILD_OS == "Macos"):
+            # Handle Macos case: move contents of versioned folder (e.g., 14.3.0) to root
+            package_folder = Path(self.package_folder)
+
+            # Find any folder that starts with "14"
+            versioned_folders = [
+                f for f in package_folder.iterdir()
+                if f.is_dir() and f.name.startswith(self.version)]
+
+            if versioned_folders:
+                # Move contents of the first matching folder to root
+                versioned_folder = versioned_folders[0]
+                self.output.info(
+                    f"Moving contents from {versioned_folder} to root")
+
+                for item in versioned_folder.iterdir():
+                    if item.is_dir():
+                        shutil.move(str(item), str(package_folder / item.name))
+                    else:
+                        shutil.move(str(item), str(package_folder / item.name))
+
+                # Remove the now-empty versioned folder
+                shutil.rmtree(versioned_folder)
+
+            # Create symlinks in bin directory for files ending with version
+            # suffix
+            bin_folder = package_folder / "bin"
+            if bin_folder.exists():
+                # Get the major version (e.g., "14" from "14.3.0")
+                major_version = self.version.split(
+                    '.')[0] if '.' in self.version else self.version
+
+                # Create symlinks for files ending with the major version
+                for item in bin_folder.iterdir():
+                    if item.is_file() and item.name.endswith(f"-{major_version}"):
+                        # Remove the version suffix from the filename (e.g., "gcc-14" -> "gcc")
+                        symlink_name = item.name[:-len(f"-{major_version}")]
+
+                        # Create symlink
+                        symlink_path = bin_folder / symlink_name
+                        if not symlink_path.exists():
+                            try:
+                                symlink_path.symlink_to(item.name)
+                                self.output.info(
+                                    f"Created symlink: {symlink_name} -> {item.name}")
+                            except OSError as e:
+                                self.output.warn(
+                                    f"Failed to create symlink {symlink_name}: {e}")
 
     def _package_local_path(self):
         """Package using a local toolchain installation"""
