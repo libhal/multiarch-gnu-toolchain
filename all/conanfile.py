@@ -303,26 +303,6 @@ class MultiarchGNUToolchainPackage(ConanFile):
             "asm": "gcc",
         })
 
-        # Determine target OS
-        if self.settings_target:
-            target_os = self.settings_target.get_safe('os')
-        else:
-            target_os = str(self.settings.os)
-
-        # Set CMake system name based on target OS
-        if target_os == "Linux":
-            self.conf_info.define(
-                "tools.cmake.cmaketoolchain:system_name", "Linux")
-        elif target_os == "Macos":
-            self.conf_info.define(
-                "tools.cmake.cmaketoolchain:system_name", "Darwin")
-        elif target_os == "Windows":
-            self.conf_info.define(
-                "tools.cmake.cmaketoolchain:system_name", "Windows")
-
-        # Tell CMake that native binaries can run on this machine
-        self.conf_info.define("tools.build.cross_building:can_run", True)
-
         # CMake extra variables for native GCC
         self.conf_info.define("tools.cmake.cmaketoolchain:extra_variables", {
             "CMAKE_C_COMPILER": "gcc",
