@@ -29,6 +29,9 @@ on:
       host_profile:
         type: string
         default: ""
+      cross_build_only:
+        type: boolean
+        default: false
 
 env:
   VERBOSE: "1"
@@ -74,6 +77,7 @@ jobs:
         run: conan create all --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* -pr:h gcc-${{ inputs.version }} ${{ inputs.host_profile }} --build=make --build=missing:make/*
 
       - name: ⚙️ Build/Install ninja from scratch using gcc for build platform
+        if: ${{ inputs.cross_build_only == false }}
         run: >
           conan install --tool-requires="ninja/1.13.2" --build="ninja/*" -pr:a gcc-${{ inputs.version }} --build=cmake --build=missing:cmake/*
 
