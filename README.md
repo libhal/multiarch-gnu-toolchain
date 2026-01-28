@@ -5,6 +5,9 @@ A Conan tool package for the GNU GCC Toolchain, providing both native compilatio
 tool package to your Conan build profile, your project can leverage GCC for
 development across multiple platforms and architectures.
 
+> [!NOTE]
+> We plan to add additional architectures like risc-v, AVR, xtensa etc.
+
 ## ✨ Key Features
 
 - **Unified toolchain**: Single package provides both native GCC and ARM
@@ -28,9 +31,9 @@ All binaries are downloaded from official sources:
 #### Native Compilation (Host Platforms)
 
 | Platform | x86_64 | ARM64 |
-|----------|--------|-------|
-| Linux    | ✅     | ✅    |
-| Windows  | ✅     | ❌    |
+| -------- | ------ | ----- |
+| Linux    | ✅      | ✅     |
+| Windows  | ✅      | ❌     |
 
 > [!NOTE]
 > Native compilation (building executables for your host OS) is only supported
@@ -41,10 +44,10 @@ All binaries are downloaded from official sources:
 The following platforms can cross-compile for ARM Cortex-M targets:
 
 | Platform | x86_64 | ARM64 |
-|----------|--------|-------|
-| Linux    | ✅     | ✅    |
-| macOS    | ✅     | ✅    |
-| Windows  | ✅     | ❌    |
+| -------- | ------ | ----- |
+| Linux    | ✅      | ✅     |
+| macOS    | ✅      | ✅     |
+| Windows  | ✅      | ❌     |
 
 ## 🚀 Quick Start
 
