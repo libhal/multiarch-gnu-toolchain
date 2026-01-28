@@ -15,7 +15,7 @@
 # limitations under the License.
 
 sources:
-  "14.2":
+  "14":
     "native": # Native GCC (compiles for the same platform it runs on)
       "Linux":
         "x86_64":
