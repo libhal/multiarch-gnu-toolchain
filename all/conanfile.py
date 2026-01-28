@@ -320,6 +320,9 @@ class MultiarchGNUToolchainPackage(ConanFile):
             self.conf_info.define(
                 "tools.cmake.cmaketoolchain:system_name", "Windows")
 
+        # Tell CMake that native binaries can run on this machine
+        self.conf_info.define("tools.build.cross_building:can_run", True)
+
         # CMake extra variables for native GCC
         self.conf_info.define("tools.cmake.cmaketoolchain:extra_variables", {
             "CMAKE_C_COMPILER": "gcc",

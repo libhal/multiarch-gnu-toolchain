@@ -7,12 +7,13 @@ project(demo LANGUAGES CXX)
 
 add_executable(demo main.cpp)
 
-if(NOT ${CMAKE_CROSSCOMPILING})
-  message(STATUS "🚀 Will launch demo after building")
-  add_custom_target(run_demo ALL DEPENDS demo COMMAND demo)
-else()
+if(${CMAKE_CROSSCOMPILING})
   message(STATUS "⏭️ Binary is not native, skipping build")
-endif(NOT ${CMAKE_CROSSCOMPILING})
+else()
+  message(STATUS "🚀 Will launch demo after building")
+endif(${CMAKE_CROSSCOMPILING})
+
+add_custom_target(run_demo ALL DEPENDS demo COMMAND ${CMAKE_BINARY_DIR}/demo)
 
 add_custom_target(copy_compile_commands ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
