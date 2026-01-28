@@ -219,7 +219,7 @@ class MultiarchGNUToolchainPackage(ConanFile):
         URL = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
         SHA256 = self.conan_data["sources"][self.version][VARIANT][BUILD_OS][BUILD_ARCH]["sha256"]
 
-        self._extract(URL, SHA256, BUILD_OS, BUILD_ARCH)
+        self._extract(URL, SHA256, BUILD_OS)
 
     def _package_local_path(self):
         """Package using a local toolchain installation"""
