@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +22,7 @@ on:
       - main
 
 jobs:
-  # ci_20:
-  #   uses: ./.github/workflows/20.yml
-  #   with:
-  #     upload: false
-
-  ci_21:
-    uses: ./.github/workflows/21.yml
+  ci_14:
+    uses: ./.github/workflows/14.yml
     with:
       upload: false

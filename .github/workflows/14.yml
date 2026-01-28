@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 🚀 Deploy 🐉 LLVM 21
+name: 🚀 Deploy 🔧 GCC 14
 
 on:
   workflow_dispatch:
@@ -23,78 +21,94 @@ on:
       upload:
         type: boolean
         default: true
-      version: # this isn't meant to be changed, its just a variable
+      version:
         type: string
-        default: 21
+        default: "14"
 
 jobs:
+  # Native compilation tests
   verify-linux-x86_64:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: ubuntu-24.04
       demo_profile: linux_x86_64
 
   verify-linux-arm:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: ubuntu-24.04-arm
       demo_profile: linux_arm
+
+  verify-macos-15-intel:
+    uses: ./.github/workflows/verify.yml
+    with:
+      version: ${{ inputs.version }}
+      os: macos-15-intel
+      demo_profile: macos_x86_64
 
   verify-macos-15-arm:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: macos-15
       demo_profile: macos_arm
 
   verify-windows-x86_64:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: windows-latest
       demo_profile: windows_x86_64
 
   verify-windows-arm:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: windows-11-arm
       demo_profile: windows_arm
 
-  verify-linux-x86_64-cortex-m0plus:
+  # ARM Cortex-M cross-compilation tests
+  verify-linux-x86_64-cortex-m4f:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: ubuntu-24.04
-      demo_profile: cortex-m0plus
+      demo_profile: cortex-m4f
 
   verify-linux-arm-cortex-m4:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: ubuntu-24.04-arm
       demo_profile: cortex-m4
 
   verify-macos-14-arm-cortex-m4f:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: macos-14
       demo_profile: cortex-m4f
 
-  verify-macos-15-arm-cortex-m7d:
+  verify-macos-15-arm-cortex-m4f:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: macos-15
-      demo_profile: cortex-m7d
+      demo_profile: cortex-m4f
+
+  verify-macos-15-intel-cortex-m4f:
+    uses: ./.github/workflows/verify.yml
+    with:
+      version: ${{ inputs.version }}
+      os: macos-15-intel
+      demo_profile: cortex-m4f
 
   verify-windows-x86_64-cortex-m33f:
     uses: ./.github/workflows/verify.yml
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}
       os: windows-latest
       demo_profile: cortex-m33f
 
@@ -102,16 +116,18 @@ jobs:
     needs:
       - verify-linux-x86_64
       - verify-linux-arm
+      - verify-macos-15-intel
       - verify-macos-15-arm
       - verify-windows-x86_64
       - verify-windows-arm
-      - verify-linux-x86_64-cortex-m0plus
+      - verify-linux-x86_64-cortex-m4f
       - verify-linux-arm-cortex-m4
       - verify-macos-14-arm-cortex-m4f
-      - verify-macos-15-arm-cortex-m7d
+      - verify-macos-15-arm-cortex-m4f
+      - verify-macos-15-intel-cortex-m4f
       - verify-windows-x86_64-cortex-m33f
     if: ${{ startsWith(github.ref, 'refs/tags/') && inputs.upload == true }}
     uses: ./.github/workflows/upload.yml
     secrets: inherit
     with:
-      version: ${{ inputs.VERSION }}
+      version: ${{ inputs.version }}

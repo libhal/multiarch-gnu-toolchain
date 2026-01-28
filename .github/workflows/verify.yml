@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2024 - 2025 Khalil Estell and the libhal contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +34,7 @@ jobs:
 
     runs-on: ${{ inputs.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -54,27 +52,16 @@ jobs:
       - name: 👁️‍🗨️ Show conan profile
         run: conan profile show
 
-      - name: 📡 Install libhal conan configurations
-        run: conan config install https://github.com/libhal/conan-config2.git
-
       - name: 📡 Install local toolchain profiles
         run: conan config install -tf profiles/ -sf conan/profiles/v1/ .
 
       - name: 📦 Create Conan Package
-        run: conan create all -pr:b default -pr:h llvm-${{ inputs.version }} -pr:h ${{ inputs.demo_profile }} --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=ninja --build=missing:ninja/* -c tools.build:skip_test=True
+        run: conan create all -pr:b default -pr:h gcc-${{ inputs.version }} -pr:h ${{ inputs.demo_profile }} --version=${{ inputs.version }} --build-require --build=cmake --build=missing:cmake/* --build=ninja --build=missing:ninja/* -c tools.build:skip_test=True
 
       - name: 📦 Build Demos Conan Package
         if: ${{ runner.os != 'Windows' }}
-        run: VERBOSE=1 conan build demos/cpp -pr llvm-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
+        run: VERBOSE=1 conan build demos/cpp -pr gcc-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
 
-      - name: 📦 Build Demos Conan Package
+      - name: 📦 Build Demos Conan Package (Windows)
         if: ${{ runner.os == 'Windows' }}
-        run: conan build demos/cpp -pr llvm-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
-
-      - name: 📦 Build Demos Conan Package
-        if: ${{ runner.os != 'Windows' }}
-        run: VERBOSE=1 conan build demos/cpp-modules -pr llvm-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
-
-      - name: 📦 Build Demos Conan Package
-        if: ${{ runner.os == 'Windows' }}
-        run: conan build demos/cpp-modules -pr llvm-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
+        run: conan build demos/cpp -pr gcc-${{ inputs.version }} -pr ${{ inputs.demo_profile }}
