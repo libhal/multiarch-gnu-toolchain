@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import shutil
 from pathlib import Path
 from conan import ConanFile
 from conan.tools.files import get
@@ -76,9 +75,9 @@ class MultiarchGNUToolchainPackage(ConanFile):
 
     LOCAL_PATH_TXT = "local_path.txt"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    # @property
+    # def settings_build(self):
+    #     return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         """Set LTO default based on compiler version"""
@@ -96,31 +95,39 @@ class MultiarchGNUToolchainPackage(ConanFile):
                 self.options.lto = True
 
     def validate(self):
-        supported_build_operating_systems = ["Linux", "Macos", "Windows"]
-        if not self._settings_build.os in supported_build_operating_systems:
-            raise ConanInvalidConfiguration(
-                f"The build os '{self._settings_build.os}' is not supported. "
-                "Pre-compiled binaries are only available for "
-                f"{supported_build_operating_systems}."
-            )
+        VARIANT = self._determine_gcc_variant()
+        BUILD_OS = str(self.settings_build.os)
+        BUILD_ARCH = str(self.settings_build.arch)
+        VERSION = self.version
+        TARGET_OS = str(
+            self.settings_target.os) if self.settings_target else BUILD_OS
+        TARGET_ARCH = str(
+            self.settings_target.arch) if self.settings_target else BUILD_ARCH
 
-        supported_build_architectures = {
-            "Linux": ["armv8", "x86_64"],
-            "Macos": ["armv8", "x86_64"],
-            "Windows": ["armv8", "x86_64"],
-        }
+        INFO_DUMP_MSG = """
 
-        if (
-            not self._settings_build.arch
-            in supported_build_architectures[str(self._settings_build.os)]
-        ):
-            build_os = str(self._settings_build.os)
-            raise ConanInvalidConfiguration(
-                f"The build architecture '{self._settings_build.arch}' "
-                f"is not supported for {self._settings_build.os}. "
-                "Pre-compiled binaries are only available for "
-                f"{supported_build_architectures[build_os]}."
-            )
+┌──────────────────────────
+│       GCC Version {0}
+│ -------------------------
+│ - variant     = {1}
+│ - target os   = {2}
+│ - target arch = {3}
+│ - build os    = {4}
+│ - build arch  = {5}
+└───────────────────────────""".format(VERSION, VARIANT, TARGET_OS, TARGET_ARCH, BUILD_OS, BUILD_ARCH)
+
+        # Check if the binary exists within the conan data
+        try:
+            URL = self.conan_data["sources"][VERSION][VARIANT][BUILD_OS][BUILD_ARCH]["url"]
+            _ = URL  # ignore URL being unused
+        except KeyError:
+            if TARGET_OS == "Macos":
+                raise ConanInvalidConfiguration(
+                    "Building native binaries with 'Macos' is not supported!" +
+                    INFO_DUMP_MSG)
+            else:
+                raise ConanInvalidConfiguration(
+                    "Toolchain binary not available/supported for: " + INFO_DUMP_MSG)
 
         # Validate LTO compression level
         try:
@@ -134,25 +141,6 @@ class MultiarchGNUToolchainPackage(ConanFile):
             raise ConanInvalidConfiguration(
                 f"lto_compression_level must be an integer, got '{LVL}'"
             )
-
-        # Validate version-variant compatibility
-        if self.settings_target:
-            variant = self._determine_gcc_variant()
-            try:
-                available_variants = list(
-                    self.conan_data['sources'][self.version].keys())
-                if variant not in available_variants:
-                    target_arch = self.settings_target.get_safe('arch')
-                    target_os = self.settings_target.get_safe('os')
-                    raise ConanInvalidConfiguration(
-                        f"Version {self.version} does not support the '{variant}' variant "
-                        f"required for target {target_os}/{target_arch}. "
-                        f"Available variants for {self.version}: {available_variants}."
-                    )
-            except KeyError:
-                raise ConanInvalidConfiguration(
-                    f"Version {self.version} is not defined in conandata.yml"
-                )
 
     def source(self):
         pass
@@ -201,10 +189,9 @@ class MultiarchGNUToolchainPackage(ConanFile):
             return
 
         VARIANT = self._determine_gcc_variant()
-        BUILD_OS = str(self._settings_build.os)
-        BUILD_ARCH = str(self._settings_build.arch)
+        BUILD_OS = str(self.settings_build.os)
+        BUILD_ARCH = str(self.settings_build.arch)
         VERSION = self.version
-        ARCH = str(self._settings_build.arch)
 
         self.output.info(f'VARIANT: {VARIANT}')
         self.output.info(f'BUILD_OS: {BUILD_OS}, BUILD_ARCH: {BUILD_ARCH}')
