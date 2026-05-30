@@ -45,9 +45,9 @@ The following platforms can cross-compile for ARM Cortex-M targets:
 
 | Platform | x86_64 | ARM64 |
 | -------- | ------ | ----- |
-| Linux    | ✅      | ✅     |
-| macOS    | ❌      | ✅     |
-| Windows  | ✅      | ❌     |
+| Linux    | ✅     | ✅     |
+| macOS    | ➖     | ✅     |
+| Windows  | ✅     | ❌     |
 
 ARM will no longer support building the offical ARM GNU Toolchain for macOS x86_64 after 14.2.rel.
 
