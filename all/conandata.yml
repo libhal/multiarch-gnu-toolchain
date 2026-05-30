@@ -61,7 +61,7 @@ sources:
       "Macos":
         "armv8":
           url: "https://github.com/libhal/multiarch-gnu-toolchain/releases/download/prebuilt-15/gcc-15.2.0_1.arm64_sequoia.bottle.tar.gz"
-          sha256: "49b6841a2b7af55b29db5d63ee47a433bd75f85e3c5620c6615e7528252ffd63"
+          sha256: "6f1e048e83f0a79ca9ecbd489f9ac122935f338fc522a782092fbbc6f7bafdeb"
     "arm-none-eabi": # ARM embedded cross-compiler
       "Linux":
         "x86_64":
