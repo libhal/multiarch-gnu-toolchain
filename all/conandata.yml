@@ -58,10 +58,11 @@ sources:
         "x86_64":
           url: "https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-win32-x64.zip"
           sha256: "be18e491c8da564f0b923d29ca0ffc8927f4a51c883d5827a8eb9c3d5386c5b0"
-      "Macos":
-        "armv8":
-          url: "https://github.com/libhal/multiarch-gnu-toolchain/releases/download/prebuilt-15/gcc-15.2.0_1.arm64_sequoia.bottle.tar.gz"
-          sha256: "6f1e048e83f0a79ca9ecbd489f9ac122935f338fc522a782092fbbc6f7bafdeb"
+      # # TODO(14): Add native mac support
+      # "Macos":
+      #   "armv8":
+      #     url: "https://github.com/libhal/multiarch-gnu-toolchain/releases/download/prebuilt-15/gcc-15.2.0_1.arm64_sequoia.bottle.tar.gz"
+      #     sha256: "6f1e048e83f0a79ca9ecbd489f9ac122935f338fc522a782092fbbc6f7bafdeb"
     "arm-none-eabi": # ARM embedded cross-compiler
       "Linux":
         "x86_64":

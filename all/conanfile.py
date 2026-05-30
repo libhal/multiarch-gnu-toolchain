@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from pathlib import Path
+import glob
 from conan import ConanFile
 from conan.tools.files import get
 from conan.errors import ConanInvalidConfiguration
@@ -208,6 +209,29 @@ class MultiarchGNUToolchainPackage(ConanFile):
 
         get(self, URL, sha256=SHA256,
             destination=self.package_folder, strip_root=should_strip_root)
+        self._create_gcc_symlinks()
+
+    def _create_gcc_symlinks(self):
+        """Create unversioned symlinks for versioned GCC tools (e.g., gcc -> gcc-15)"""
+        bin_path = Path(self.package_folder) / "bin"
+        if not bin_path.exists():
+            return
+
+        major_version = str(self.version).split('.')[0]
+        version_suffix = f"-{major_version}"
+
+        for versioned_file in glob.glob(str(bin_path / f"*{version_suffix}")):
+            versioned_path = Path(versioned_file)
+            versioned_name = versioned_path.name
+            unversioned_name = versioned_name.replace(version_suffix, "")
+            unversioned_path = bin_path / unversioned_name
+
+            if not unversioned_path.exists():
+                try:
+                    unversioned_path.symlink_to(versioned_name)
+                    self.output.info(f"Created symlink: {unversioned_name} -> {versioned_name}")
+                except OSError as e:
+                    self.output.warning(f"Failed to create symlink for {unversioned_name}: {e}")
 
     def _package_local_path(self):
         """Package using a local toolchain installation"""
