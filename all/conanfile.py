@@ -202,7 +202,6 @@ class MultiarchGNUToolchainPackage(ConanFile):
         # For some reason ARM decided to make this version have a different
         # folder layout compared to others so we need a special case for this.
         should_strip_root = not (
-            (VERSION == "14.2" or VERSION == "14.3" or VERSION == "14") and
             (BUILD_OS == "Windows" and BUILD_ARCH == "x86_64") and
             VARIANT == "arm-none-eabi"
         )
