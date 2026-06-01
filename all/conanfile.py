@@ -275,15 +275,21 @@ class MultiarchGNUToolchainPackage(ConanFile):
 
         # CMake extra variables for native GCC
         self.conf_info.define("tools.cmake.cmaketoolchain:extra_variables", {
+            # Compilers
             "CMAKE_C_COMPILER": "gcc",
             "CMAKE_CXX_COMPILER": "g++",
             "CMAKE_ASM_COMPILER": "gcc",
+
+            # Bin utils
             "CMAKE_AR": "ar",
             "CMAKE_RANLIB": "ranlib",
             "CMAKE_STRIP": "strip",
             "CMAKE_OBJCOPY": "objcopy",
             "CMAKE_OBJDUMP": "objdump",
             "CMAKE_NM": "nm",
+
+            # Modules CMake Support
+            "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES": "1942b4fa-b2c5-4546-9385-83f254070067",
         })
 
         # Build environment variables
@@ -338,7 +344,12 @@ class MultiarchGNUToolchainPackage(ConanFile):
             "CMAKE_C_COMPILER_WORKS": "TRUE",
             "CMAKE_TRY_COMPILE_TARGET_TYPE": "STATIC_LIBRARY",
 
-            # Binutils
+            # Compilers
+            "CMAKE_C_COMPILER": "arm-none-eabi-gcc",
+            "CMAKE_CXX_COMPILER": "arm-none-eabi-g++",
+            "CMAKE_ASM_COMPILER": "arm-none-eabi-gcc",
+
+            # Bin utils
             "CMAKE_AR": "arm-none-eabi-ar",
             "CMAKE_RANLIB": "arm-none-eabi-ranlib",
             "CMAKE_STRIP": "arm-none-eabi-strip",
@@ -346,6 +357,9 @@ class MultiarchGNUToolchainPackage(ConanFile):
             "CMAKE_OBJDUMP": "arm-none-eabi-objdump",
             "CMAKE_NM": "arm-none-eabi-nm",
             "CMAKE_SIZE_UTIL": "arm-none-eabi-size",
+
+            # Modules CMake Support
+            "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES": "1942b4fa-b2c5-4546-9385-83f254070067",
         })
 
         # Build environment variables
