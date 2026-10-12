@@ -258,6 +258,12 @@ class MultiarchGNUToolchainPackage(ConanFile):
     def package_info(self):
         VARIANT = self._determine_gcc_variant()
 
+        # Silence GCC's "ignored attribute" warnings for Clang-only attributes
+        # such as [[clang::lifetimebound]] and [[gsl::Pointer]], which libraries
+        # use for Clang's lifetime safety analysis.
+        self.conf_info.append("tools.build:cxxflags", "-Wno-attributes=clang::")
+        self.conf_info.append("tools.build:cxxflags", "-Wno-attributes=gsl::")
+
         if VARIANT == "native":
             self._configure_native_gcc()
         elif VARIANT == "arm-none-eabi":
